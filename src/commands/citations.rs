@@ -23,7 +23,12 @@ pub async fn citation(
 
     // Send the message to the configured channel
     channel_id.send_message(ctx.http(), message).await?;
-    ctx.say("Citation sauvegardée").await?;
+    ctx.send(
+        poise::CreateReply::default()
+            .content("Citation sauvegardée")
+            .ephemeral(true),
+    )
+    .await?;
     Ok(())
 }
 
@@ -51,7 +56,12 @@ pub async fn citation_msg(
 
     // Send the message to the configured channel
     channel_id.send_message(ctx.http(), message).await?;
-    ctx.say("Citation sauvegardée").await?;
+    ctx.send(
+        poise::CreateReply::default()
+            .content("Citation sauvegardée")
+            .ephemeral(true),
+    )
+    .await?;
     Ok(())
 }
 
@@ -68,7 +78,7 @@ async fn get_citation_channel(ctx: Context<'_>) -> Result<serenity::ChannelId, E
 
     match citation_channels.get(&guild_id) {
         Some(channel_id) => Ok(*channel_id),
-        None => Err("No citation channel configured. Use /setup first.".into()),
+        None => Err("No citation channel configured".into()),
     }
 }
 
