@@ -1,13 +1,10 @@
 mod commands;
-// mod types;
 use poise::serenity_prelude as serenity;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
-// Data struct to hold bot configuration
 pub struct Data {
-    // Maps guild_id -> citation_channel_id
     pub citation_channels: RwLock<HashMap<serenity::GuildId, serenity::ChannelId>>,
 }
 
@@ -18,6 +15,7 @@ impl Data {
         }
     }
 }
+
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Arc<Data>, Error>;
 
@@ -30,10 +28,9 @@ async fn main() {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             commands: vec![
-                commands::citation(),
-                commands::citation_msg(),
-                // commands::create_channel(),
-                commands::setup(),
+                commands::citations::citation(),
+                commands::citations::citation_msg(),
+                commands::admin::setup(),
             ],
             ..Default::default()
         })
