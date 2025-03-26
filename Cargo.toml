@@ -1,0 +1,8 @@
+[package]
+name = "rusty_bot"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+poise = { version = "0.6.1", features = ["cache"] }
+tokio = { version = "1.44.1", features = ["rt-multi-thread"] }
