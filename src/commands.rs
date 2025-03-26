@@ -17,9 +17,13 @@ pub async fn citation(
     );
 
     let message = serenity::CreateMessage::new().embed(embed);
-    let channel = serenity::ChannelId::new(1354022503256821770);
-    channel.send_message(ctx.http(), message).await?;
-    ctx.say(format!("Citation sauvegardée")).await?;
+
+    // Get the configured channel ID
+    let channel_id = get_citation_channel(ctx).await?;
+
+    // Send the message to the configured channel
+    channel_id.send_message(ctx.http(), message).await?;
+    ctx.say("Citation sauvegardée").await?;
     Ok(())
 }
 
@@ -42,11 +46,30 @@ pub async fn citation_msg(
         Some(msg.channel_id),
     );
     let message = serenity::CreateMessage::new().embed(embed);
-    // Temporary hard coding channel id
-    let channel = serenity::ChannelId::new(00000000);
-    channel.send_message(ctx.http(), message).await?;
+    // Get the configured channel ID
+    let channel_id = get_citation_channel(ctx).await?;
+
+    // Send the message to the configured channel
+    channel_id.send_message(ctx.http(), message).await?;
     ctx.say("Citation sauvegardée").await?;
     Ok(())
+}
+
+async fn get_citation_channel(ctx: Context<'_>) -> Result<serenity::ChannelId, Error> {
+    let guild_id = match ctx.guild_id() {
+        Some(id) => id,
+        None => {
+            return Err("This command must be used in a server".into());
+        }
+    };
+
+    // Try to get the configured channel ID for this guild
+    let citation_channels = ctx.data().citation_channels.read().await;
+
+    match citation_channels.get(&guild_id) {
+        Some(channel_id) => Ok(*channel_id),
+        None => Err("No citation channel configured. Use /setup first.".into()),
+    }
 }
 
 fn create_citation_embed(
@@ -107,25 +130,27 @@ pub async fn create_channel(
     Ok(())
 }
 
-///Placeholder help text
-#[poise::command(slash_command)]
+///Configure the channel where citations will be saved
+#[poise::command(slash_command, required_permissions = "ADMINISTRATOR")]
 pub async fn setup(
     ctx: Context<'_>,
-    #[description = "Nom du channel et du role"] channel: serenity::GuildChannel,
-    #[description = "Nom du channel et du role"] roles: Option<serenity::Role>,
-    // #[description = "Nom du channel et du role"] name: String,
+    #[description = "Channel to save citations"] channel: serenity::GuildChannel,
 ) -> Result<(), Error> {
-    // let select_menu =
-    //     serenity::SelectMenu::new(serenity::CreateSelectMenuKind::Role { default_roles: () });
-    // let message = channel.send_message(ctx.http(), builder).await;
-    // match message {
-    //     Ok(msg) => {
-    //         ctx.say(format!("Message sent: {}", msg.content)).await?;
-    //     }
-    //     Err(err) => {
-    //         ctx.say(format!("Failed to send message: {}", err)).await?;
-    //     }
-    // }
-    ctx.say(format!("setup {:?} in {}", roles, channel)).await?;
+    let guild_id = match ctx.guild_id() {
+        Some(id) => id,
+        None => {
+            ctx.say("This command must be used in a server").await?;
+            return Ok(());
+        }
+    };
+
+    // Save the channel ID for this guild
+    {
+        let mut citation_channels = ctx.data().citation_channels.write().await;
+        citation_channels.insert(guild_id, channel.id);
+    }
+
+    ctx.say(format!("Citations will now be saved to {}", channel))
+        .await?;
     Ok(())
 }
