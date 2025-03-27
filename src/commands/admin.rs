@@ -54,7 +54,11 @@ pub async fn setup(
         citation_channels.insert(guild_id, channel.id);
     }
 
-    ctx.say(format!("Citations will now be saved to {}", channel))
-        .await?;
+    ctx.send(
+        poise::CreateReply::default()
+            .content(format!("Citations will now be saved to {}", channel))
+            .ephemeral(true),
+    )
+    .await?;
     Ok(())
 }

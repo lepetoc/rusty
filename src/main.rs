@@ -6,12 +6,14 @@ use tokio::sync::RwLock;
 
 pub struct Data {
     pub citation_channels: RwLock<HashMap<serenity::GuildId, serenity::ChannelId>>,
+    pub select_roles: RwLock<HashMap<serenity::GuildId, Vec<serenity::RoleId>>>,
 }
 
 impl Data {
     pub fn new() -> Self {
         Self {
             citation_channels: RwLock::new(HashMap::new()),
+            select_roles: RwLock::new(HashMap::new()),
         }
     }
 }
@@ -28,9 +30,10 @@ async fn main() {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             commands: vec![
+                commands::admin::setup(),
                 commands::citations::citation(),
                 commands::citations::citation_msg(),
-                commands::admin::setup(),
+                commands::utility::role(),
             ],
             ..Default::default()
         })
