@@ -36,8 +36,18 @@ pub async fn create_channel(
 }
 
 /// Configure the channel where citations will be saved
-#[poise::command(slash_command, required_permissions = "ADMINISTRATOR")]
-pub async fn setup(
+#[poise::command(
+    slash_command,
+    required_permissions = "ADMINISTRATOR",
+    subcommands("setup_citation"),
+    subcommand_required
+)]
+pub async fn setup(_: Context<'_>) -> Result<(), Error> {
+    Ok(())
+}
+
+#[poise::command(slash_command, rename = "citation")]
+pub async fn setup_citation(
     ctx: Context<'_>,
     #[description = "Channel to save citations"] channel: serenity::GuildChannel,
 ) -> Result<(), Error> {
