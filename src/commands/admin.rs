@@ -1,6 +1,6 @@
 use std::vec;
 
-use poise::serenity_prelude::{self as serenity, PermissionOverwrite, Permissions};
+use poise::serenity_prelude::{self as serenity, ChannelId, PermissionOverwrite, Permissions};
 
 use crate::{Context, Error};
 
@@ -10,14 +10,15 @@ pub async fn create_channel(
     ctx: Context<'_>,
     #[description = "Nom du channel"] name: String,
     #[description = "Nom du role"] role_name: Option<String>,
+    #[description = "Category"] category: Option<ChannelId>,
 ) -> Result<(), Error> {
     let role_name = role_name.as_ref().unwrap_or_else(|| &name);
     let guild = ctx.guild().as_deref().unwrap().to_owned();
-    let builder = serenity::EditRole::new()
+    let role_builder = serenity::EditRole::new()
         .name(role_name)
         .hoist(false)
         .mentionable(true);
-    let role = guild.create_role(ctx.http(), builder).await?;
+    let role = guild.create_role(ctx.http(), role_builder).await?;
     let guild_id = match ctx.guild_id() {
         Some(id) => id,
         None => {
@@ -38,10 +39,15 @@ pub async fn create_channel(
         },
     ];
 
-    let builder = serenity::CreateChannel::new(&name)
+    let mut channel_builder = serenity::CreateChannel::new(&name)
         .kind(serenity::ChannelType::Text)
         .permissions(permissions);
-    let channel = guild.create_channel(ctx.http(), builder).await;
+
+    if let Some(category_id) = category {
+        //TODO Check if the channel is a category
+        channel_builder = channel_builder.category(category_id);
+    }
+    let channel = guild.create_channel(ctx.http(), channel_builder).await;
 
     match channel {
         Ok(channel) => {
