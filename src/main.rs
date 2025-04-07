@@ -31,6 +31,7 @@ async fn main() {
         .options(poise::FrameworkOptions {
             commands: vec![
                 commands::admin::setup(),
+                commands::admin::create_channel(),
                 commands::citations::citation(),
                 commands::citations::citation_msg(),
                 commands::utility::role(),
