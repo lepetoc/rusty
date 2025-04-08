@@ -4,7 +4,7 @@ use poise::serenity_prelude::{self as serenity, ChannelId, PermissionOverwrite, 
 
 use crate::{Context, Error};
 
-///Placeholder help text
+///A command that create a private channel with the associated role
 #[poise::command(slash_command, required_permissions = "ADMINISTRATOR")]
 pub async fn create_channel(
     ctx: Context<'_>,
@@ -12,30 +12,23 @@ pub async fn create_channel(
     #[description = "Nom du role"] role_name: Option<String>,
     #[description = "Category"] category: Option<ChannelId>,
 ) -> Result<(), Error> {
-    let role_name = role_name.as_ref().unwrap_or_else(|| &name);
     let guild = ctx.guild().as_deref().unwrap().to_owned();
+    let role_name = role_name.as_ref().unwrap_or_else(|| &name);
     let role_builder = serenity::EditRole::new()
         .name(role_name)
         .hoist(false)
         .mentionable(true);
     let role = guild.create_role(ctx.http(), role_builder).await?;
-    let guild_id = match ctx.guild_id() {
-        Some(id) => id,
-        None => {
-            ctx.say("This command must be used in a server").await?;
-            return Ok(());
-        }
-    };
     let permissions = vec![
         PermissionOverwrite {
             allow: Permissions::VIEW_CHANNEL,
-            deny: Permissions::SEND_TTS_MESSAGES,
+            deny: Permissions::empty(),
             kind: serenity::PermissionOverwriteType::Role(role.id),
         },
         PermissionOverwrite {
-            allow: Permissions::SEND_MESSAGES,
+            allow: Permissions::empty(),
             deny: Permissions::VIEW_CHANNEL,
-            kind: serenity::PermissionOverwriteType::Role(guild_id.everyone_role()),
+            kind: serenity::PermissionOverwriteType::Role(guild.id.everyone_role()),
         },
     ];
 
@@ -54,8 +47,6 @@ pub async fn create_channel(
             let message = serenity::CreateMessage::new()
                 .content(format!("Ce salon a été créé par {}", ctx.author()));
             channel.send_message(ctx.http(), message).await?;
-            // ctx.say(format!("Channel {} created successfully", channel))
-            //     .await?;
             ctx.send(
                 poise::CreateReply::default()
                     .content(format!("Channel {} created successfully", channel))
@@ -71,7 +62,6 @@ pub async fn create_channel(
     Ok(())
 }
 
-/// Configure the channel where citations will be saved
 #[poise::command(
     slash_command,
     required_permissions = "ADMINISTRATOR",
@@ -82,6 +72,7 @@ pub async fn setup(_: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
+/// Configure the channel where citations will be saved
 #[poise::command(slash_command, rename = "citation")]
 pub async fn setup_citation(
     ctx: Context<'_>,
