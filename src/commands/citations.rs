@@ -2,7 +2,7 @@ use poise::serenity_prelude as serenity;
 
 use crate::{Context, Error};
 /// Save the text as a citation
-#[poise::command(slash_command)]
+#[poise::command(slash_command, ephemeral)]
 pub async fn citation(
     ctx: Context<'_>,
     #[description = "Citation de génie"] citation: String,
@@ -18,22 +18,16 @@ pub async fn citation(
 
     let message = serenity::CreateMessage::new().embed(embed);
 
-    // Get the configured channel ID
     let channel_id = get_citation_channel(ctx).await?;
 
-    // Send the message to the configured channel
     channel_id.send_message(ctx.http(), message).await?;
-    ctx.send(
-        poise::CreateReply::default()
-            .content("Citation sauvegardée")
-            .ephemeral(true),
-    )
-    .await?;
+    ctx.send(poise::CreateReply::default().content("Citation sauvegardée"))
+        .await?;
     Ok(())
 }
 
 /// Save the selected message to a specific channel
-#[poise::command(context_menu_command = "Citation")]
+#[poise::command(context_menu_command = "Citation", ephemeral)]
 pub async fn citation_msg(
     ctx: Context<'_>,
     #[description = "Citation de génie"] msg: serenity::Message,
@@ -56,12 +50,8 @@ pub async fn citation_msg(
 
     // Send the message to the configured channel
     channel_id.send_message(ctx.http(), message).await?;
-    ctx.send(
-        poise::CreateReply::default()
-            .content("Citation sauvegardée")
-            .ephemeral(true),
-    )
-    .await?;
+    ctx.send(poise::CreateReply::default().content("Citation sauvegardée"))
+        .await?;
     Ok(())
 }
 

@@ -70,7 +70,7 @@ pub async fn setup(_: Context<'_>) -> Result<(), Error> {
 }
 
 /// Configure the channel where citations will be saved
-#[poise::command(slash_command, rename = "citation")]
+#[poise::command(slash_command, rename = "citation", ephemeral)]
 pub async fn setup_citation(
     ctx: Context<'_>,
     #[description = "Channel to save citations"] channel: serenity::GuildChannel,
@@ -90,8 +90,7 @@ pub async fn setup_citation(
 
     ctx.send(
         poise::CreateReply::default()
-            .content(format!("Citations will now be saved to {}", channel))
-            .ephemeral(true),
+            .content(format!("Citations will now be saved to {}", channel)),
     )
     .await?;
     Ok(())

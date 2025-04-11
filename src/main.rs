@@ -20,7 +20,6 @@ impl Data {
 
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Arc<Data>, Error>;
-// type ApplicationContext<'a> = poise::ApplicationContext<'a, Arc<Data>, Error>;
 
 #[tokio::main]
 async fn main() {
