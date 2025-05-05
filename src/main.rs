@@ -3,6 +3,7 @@ use poise::serenity_prelude as serenity;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
+use dotenv::dotenv;
 
 pub struct Data {
     pub citation_channels: RwLock<HashMap<serenity::GuildId, serenity::ChannelId>>,
@@ -23,6 +24,7 @@ type Context<'a> = poise::Context<'a, Arc<Data>, Error>;
 
 #[tokio::main]
 async fn main() {
+    dotenv().ok();
     let token = std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN");
     let intents = serenity::GatewayIntents::non_privileged();
     let data = Arc::new(Data::new());
